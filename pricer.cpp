@@ -33,12 +33,18 @@ class OrderBookProgram{
 
 		// Add Order to Book
 		void addOrder(const string orderID, const bool ask, const double price, const unsigned long count){
-			cout<<"orderID: "<<orderID<<" ask: "<<ask<<" price: "<<price<<" count: "<<count<<endl; 
+			//cout<<"orderID: "<<orderID<<" ask: "<<ask<<" price: "<<price<<" count: "<<count<<endl; 
+			if(ask){
+				
+			}
+			else{
+
+			}
 		}
 
 		// Reduce Order
 		void reduceOrder(const string orderID, const unsigned long count){
-			cout<<"orderID: "<<orderID<<" count: "<<count<<endl;
+			//cout<<"orderID: "<<orderID<<" count: "<<count<<endl;
 		}
 
 		// Check whether current # of stock is meet or exceed target size
