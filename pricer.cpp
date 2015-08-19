@@ -42,11 +42,9 @@ class Pricer{
 		// Calculate income/expense
 		double calResult(bool ask){
 			double result = 0;
-			string str = ask?"Ask":"Bid";
-			long tmpCur = targetSize;
+			unsigned long tmpCur = targetSize;
 			map<double, unsigned long>::iterator it=ask?askPriceRec.begin():bidPriceRec.begin();
 			for(;tmpCur>0.0;it++){
-				//cout<<"price: "<<it->first<<" count: "<<it->second<<endl;
 				if(tmpCur>=it->second){
 					result+=(it->first)*(it->second);
 					tmpCur-=(it->second);
@@ -61,31 +59,28 @@ class Pricer{
 
 		// Add Order to Book
 		void addOrder(const string orderID, const bool ask, const double price, const unsigned long count){
-			//cout<<"orderID: "<<orderID<<" ask: "<<ask<<" price: "<<price<<" count: "<<count<<endl; 
 			orderRec[orderID] = make_pair(ask, make_pair(price, count));
 			double cur = ask?curExpence:curIncome;
+			
+			// Update price record
 			if(ask){
 				askPriceRec[price] += count;
 				curAsk+=count;
-				//cout<<"add "<<count<<" - curAsk: "<<curAsk<<endl;
 			}
 			else{
 				bidPriceRec[price] += count;
 				curBid+=count;
-				//cout<<"add "<<count<<" - curBid: "<<curBid<<endl;
 			}
-			//cout<<"after add: ";
+
+			// Check the # of shares
 			if(checkTarget(ask)){
 				double total = calResult(ask);
 				if(cur!=total){
-					//cout<<"added and Nail it!"<<endl;
 					printResult(curTime, ask, total);
-					if(ask){
+					if(ask)
 						curExpence = total;
-					}
-					else{
+					else
 						curIncome = total;
-					}
 				}
 			}
 		}
@@ -97,50 +92,46 @@ class Pricer{
 			bool ask = orderRec[orderID].first;
 			bool na;
 			double cur = ask?curExpence:curIncome;
+			
+			// Update price record
 			if(ask){
-				//cout<<"ask"<<endl;
 				na = (curAsk<targetSize);
 				askPriceRec[rePrice]-=count;
 				curAsk-=count;
-				//cout<<"reduce  "<<count<<" - curAsk: "<<curAsk<<endl;
 				if(askPriceRec[rePrice]==0)
 					askPriceRec.erase(rePrice);
 			}
 			else{
-				//cout<<"bid"<<endl;
 				na = (curBid<targetSize);
 				bidPriceRec[rePrice]-=count;
 				curBid-=count;
-				//cout<<"reduce  "<<count<<" - curBid: "<<curAsk<<endl;
 				if(bidPriceRec[rePrice]==0)
 					bidPriceRec.erase(rePrice);
 			}
+
+			// Update order record
 			orderRec[orderID].second.second-=count;
 			if(orderRec[orderID].second.second==0){
 				orderRec.erase(orderID);
 			}
 
-			//cout<<"after reduce: ";
+			// Check the # of shares
 			if(checkTarget(ask)){
-				//cout<<" still buy it!"<<endl;
 				double total = calResult(ask);
 				if(cur!=total){
-					//cout<<"reduced and Nail it!"<<endl;
 					printResult(curTime, ask, total);
-					if(ask){
+					if(ask)
 						curExpence = total;
-					}
-					else{
+					else
 						curIncome = total;
-					}
 				}
 			}
 			else{
 				if(!na){
-					//cout<<"become NA!"<<endl;
-					if(ask)
+					// Update income/expence
+					if(ask)	
 						curExpence=0.0;
-					else
+					else	
 						curIncome=0.0;
 					printResult(curTime, ask, 0);
 				}
@@ -173,21 +164,16 @@ class Pricer{
 		// tokens[5]: count
 		void analysis(){
 			string line;
-			//cout<<"open "<<filepath<<endl;
 			targetFile.open(filepath,ios::binary|ios::out);
 			if(targetFile.is_open()){
 				while(getline(targetFile,line)){
-					//cout<<line<<endl;
 					vector<string> tokens = split(line, ' ');
 					curTime = tokens[0];
-					if(tokens[1]=="A"){
-						//cout<<"Add Book Order!"<<endl;
+					if(tokens[1]=="A")
 						addOrder(tokens[2],(tokens[3]=="S"), stod(tokens[4]), stoul(tokens[5]));
-					}
-					else{
-						//cout<<"Reduce Order!"<<endl;
+				
+					else
 						reduceOrder(tokens[2],  stoul(tokens[3]));
-					}
 				}
 				targetFile.close();
 			}
