@@ -5,4 +5,4 @@ Programming Project from RGM
     - g++ pricer.cpp -o pricer
 
 2. How to execute this program?
-    - ./pricer <target_size> (e.g. ./pricer 200)
+    - ./pricer target_size (e.g. ./pricer 200)
